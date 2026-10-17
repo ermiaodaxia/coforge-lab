@@ -34,7 +34,7 @@ const visibleRequirements = computed(() => {
       return false
     }
 
-    return keyword === '' || requirement.title.includes(keyword)
+    return keyword === '' || requirement.title.toLowerCase().includes(keyword)
   })
 })
 
