@@ -18,18 +18,33 @@ const emit = defineEmits<{
 }>()
 
 const statusFilter = ref<RequirementFilter>('all')
+const searchTerm = ref('')
 
-const visibleRequirements = computed(() =>
-  statusFilter.value === 'all'
-    ? props.requirements
-    : props.requirements.filter((requirement) => requirement.status === statusFilter.value),
-)
+const normalizedSearch = computed(() => searchTerm.value.trim().toLowerCase())
+const activeSearch = computed(() => searchTerm.value.trim())
 
-const countLabel = computed(() =>
-  statusFilter.value === 'all'
-    ? `${props.requirements.length} 条`
-    : `${visibleRequirements.value.length} / ${props.requirements.length} 条`,
-)
+const visibleRequirements = computed(() => {
+  const keyword = normalizedSearch.value
+
+  return props.requirements.filter((requirement) => {
+    const matchesStatus =
+      statusFilter.value === 'all' || requirement.status === statusFilter.value
+
+    if (!matchesStatus) {
+      return false
+    }
+
+    return keyword === '' || requirement.title.toLowerCase().includes(keyword)
+  })
+})
+
+const countLabel = computed(() => {
+  const filtering = statusFilter.value !== 'all' || normalizedSearch.value !== ''
+
+  return filtering
+    ? `${visibleRequirements.value.length} / ${props.requirements.length} 条`
+    : `${props.requirements.length} 条`
+})
 
 const statusCountLabel = computed(() => {
   const counts: Record<RequirementStatus, number> = {
@@ -68,6 +83,13 @@ function handleFilterChange(event: Event): void {
             {{ STATUS_LABELS[status] }}
           </option>
         </select>
+        <label for="title-search">搜索标题</label>
+        <input
+          id="title-search"
+          v-model="searchTerm"
+          type="search"
+          placeholder="输入标题关键词"
+        />
         <span class="status-counts">{{ statusCountLabel }}</span>
         <span class="requirement-count">{{ countLabel }}</span>
       </div>
@@ -78,7 +100,12 @@ function handleFilterChange(event: Event): void {
     </p>
 
     <p v-else-if="visibleRequirements.length === 0" class="empty-state">
-      暂无符合条件的需求
+      <template v-if="activeSearch !== ''">
+        没有找到标题包含“{{ activeSearch }}”的需求
+      </template>
+      <template v-else>
+        暂无符合条件的需求
+      </template>
     </p>
 
     <ul v-else class="requirement-list">

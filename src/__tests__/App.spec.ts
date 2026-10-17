@@ -70,4 +70,41 @@ describe('App', () => {
     ])
     expect(wrapper.text()).toContain('2 条')
   })
+
+  it('filters by title search without touching persisted data', async () => {
+    const wrapper = mount(App)
+
+    await wrapper.find('#requirement-title').setValue('导出标题测试')
+    await wrapper.find('form').trigger('submit')
+    await wrapper.find('#requirement-title').setValue('导入标题测试')
+    await wrapper.find('form').trigger('submit')
+
+    const storedBeforeSearch = window.localStorage.getItem(STORAGE_KEY)
+
+    await wrapper.find('#title-search').setValue('导出')
+
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '导出标题测试',
+    ])
+    expect(wrapper.text()).toContain('1 / 2 条')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(storedBeforeSearch)
+
+    await wrapper.find('#status-filter').setValue('todo')
+    await wrapper.find('#title-search').setValue('导入')
+
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '导入标题测试',
+    ])
+
+    await wrapper.find('#status-filter').setValue('done')
+
+    expect(wrapper.findAll('li')).toHaveLength(0)
+    expect(wrapper.text()).toContain('没有找到标题包含“导入”的需求')
+
+    await wrapper.find('#title-search').setValue('')
+
+    expect(wrapper.findAll('li')).toHaveLength(0)
+    expect(wrapper.text()).toContain('暂无符合条件的需求')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(storedBeforeSearch)
+  })
 })
