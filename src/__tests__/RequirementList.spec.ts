@@ -131,6 +131,28 @@ describe('RequirementList', () => {
     ])
   })
 
+  it('emits the requirement id when a delete button is clicked', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.findAll('.delete-button')[1].trigger('click')
+
+    expect(wrapper.emitted('delete')).toEqual([['requirement-2']])
+    expect(wrapper.emitted('update-status')).toBeUndefined()
+  })
+
+  it('forwards deletes for the filtered requirement while a filter is active', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+    await wrapper.find('.delete-button').trigger('click')
+
+    expect(wrapper.emitted('delete')).toEqual([['requirement-2']])
+  })
+
   it('shows status counts for all requirements regardless of the active filter', async () => {
     const wrapper = mount(RequirementList, {
       props: { requirements },

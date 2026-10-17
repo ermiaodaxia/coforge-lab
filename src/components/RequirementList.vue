@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update-status': [id: string, status: RequirementStatus]
+  delete: [id: string]
 }>()
 
 const statusFilter = ref<RequirementFilter>('all')
@@ -87,6 +88,7 @@ function handleFilterChange(event: Event): void {
         :key="requirement.id"
         :requirement="requirement"
         @update-status="(id, status) => emit('update-status', id, status)"
+        @delete="(id) => emit('delete', id)"
       />
     </ul>
   </section>

@@ -10,6 +10,7 @@
 - 展示需求列表，新增的需求显示在列表顶部。
 - 按状态筛选需求：全部、待处理、进行中、已完成，默认展示全部；筛选控件旁显示各状态的需求数量统计。
 - 修改需求状态：待处理、进行中、已完成。
+- 删除需求：点击删除按钮并确认后移除对应需求；取消则保留。
 - 使用浏览器本地存储（`localStorage`），刷新页面后保留数据。
 
 第一版不包含后端服务、登录或多人权限。所有数据仅保存在当前浏览器中。
@@ -55,7 +56,7 @@ src/
 ├── components/
 │   ├── RequirementForm.vue      # 新增需求表单
 │   ├── RequirementList.vue      # 需求列表
-│   └── RequirementItem.vue      # 单条需求与状态修改
+│   └── RequirementItem.vue      # 单条需求、状态修改与删除
 ├── composables/
 │   └── useRequirements.ts       # 需求读写与 localStorage 持久化
 ├── types/
