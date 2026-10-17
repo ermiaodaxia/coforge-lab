@@ -4,8 +4,13 @@ import RequirementList from './components/RequirementList.vue'
 import { useRequirements } from './composables/useRequirements'
 import type { RequirementStatus } from './types/requirement'
 
-const { requirements, persistenceError, addRequirement, updateStatus } =
-  useRequirements()
+const {
+  requirements,
+  persistenceError,
+  addRequirement,
+  updateStatus,
+  removeRequirement,
+} = useRequirements()
 
 function handleSubmit(payload: { title: string; description: string }): void {
   addRequirement(payload.title, payload.description)
@@ -13,6 +18,20 @@ function handleSubmit(payload: { title: string; description: string }): void {
 
 function handleStatusChange(id: string, status: RequirementStatus): void {
   updateStatus(id, status)
+}
+
+function handleDelete(id: string): void {
+  const requirement = requirements.value.find((item) => item.id === id)
+
+  if (!requirement) {
+    return
+  }
+
+  if (!window.confirm(`确定要删除需求「${requirement.title}」吗？`)) {
+    return
+  }
+
+  removeRequirement(id)
 }
 </script>
 
@@ -36,6 +55,7 @@ function handleStatusChange(id: string, status: RequirementStatus): void {
       <RequirementList
         :requirements="requirements"
         @update-status="handleStatusChange"
+        @delete="handleDelete"
       />
     </main>
 

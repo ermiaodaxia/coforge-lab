@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update-status': [id: string, status: RequirementStatus]
+  delete: [id: string]
 }>()
 
 const createdAtLabel = computed(() =>
@@ -28,6 +29,10 @@ function handleStatusChange(event: Event): void {
     props.requirement.id,
     (event.target as HTMLSelectElement).value as RequirementStatus,
   )
+}
+
+function handleDelete(): void {
+  emit('delete', props.requirement.id)
 }
 </script>
 
@@ -53,5 +58,14 @@ function handleStatusChange(event: Event): void {
         </option>
       </select>
     </div>
+
+    <button
+      type="button"
+      class="delete-button"
+      :aria-label="`删除需求：${requirement.title}`"
+      @click="handleDelete"
+    >
+      删除
+    </button>
   </li>
 </template>
