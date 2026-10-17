@@ -195,3 +195,85 @@ describe('RequirementList', () => {
     expect(wrapper.text()).toContain('2 条')
   })
 })
+
+describe('RequirementList description collapse', () => {
+  function longDescription(marker: string): string {
+    return `${'描述'.repeat(50)}${marker}`
+  }
+
+  const longRequirements: Requirement[] = [
+    {
+      id: 'long-1',
+      title: '长描述待处理',
+      description: longDescription('甲结尾'),
+      status: 'todo',
+      createdAt: '2026-01-04T08:00:00.000Z',
+      updatedAt: '2026-01-04T08:00:00.000Z',
+    },
+    {
+      id: 'long-2',
+      title: '长描述已完成',
+      description: longDescription('乙结尾'),
+      status: 'done',
+      createdAt: '2026-01-05T08:00:00.000Z',
+      updatedAt: '2026-01-05T08:00:00.000Z',
+    },
+  ]
+
+  it('expands each requirement independently', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements: longRequirements },
+    })
+
+    await wrapper.findAll('.description-toggle')[0].trigger('click')
+
+    const items = wrapper.findAll('.requirement-item')
+    expect(items[0].find('.description-toggle').text()).toBe('收起')
+    expect(items[0].find('.requirement-description').text()).toContain('甲结尾')
+    expect(items[1].find('.description-toggle').text()).toBe('展开')
+    expect(items[1].find('.requirement-description').text()).not.toContain('乙结尾')
+  })
+
+  it('does not carry an expanded state across status filters', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements: longRequirements },
+    })
+
+    await wrapper.findAll('.description-toggle')[0].trigger('click')
+    await wrapper.find('#status-filter').setValue('done')
+
+    const filteredItems = wrapper.findAll('.requirement-item')
+    expect(filteredItems).toHaveLength(1)
+    expect(filteredItems[0].find('h3').text()).toBe('长描述已完成')
+    expect(filteredItems[0].find('.description-toggle').text()).toBe('展开')
+    expect(
+      filteredItems[0].find('.description-toggle').attributes('aria-expanded'),
+    ).toBe('false')
+    expect(filteredItems[0].find('.requirement-description').text()).not.toContain(
+      '乙结尾',
+    )
+
+    await wrapper.find('#status-filter').setValue('all')
+
+    expect(
+      wrapper.findAll('.description-toggle').map((toggle) => toggle.text()),
+    ).toEqual(['展开', '展开'])
+  })
+
+  it('expands only the visible requirement after filtering', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements: longRequirements },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+    await wrapper.find('.description-toggle').trigger('click')
+
+    expect(wrapper.find('.description-toggle').text()).toBe('收起')
+    expect(wrapper.find('.requirement-description').text()).toContain('乙结尾')
+
+    await wrapper.find('#status-filter').setValue('todo')
+
+    expect(wrapper.find('.requirement-description').text()).not.toContain('甲结尾')
+    expect(wrapper.find('.description-toggle').text()).toBe('展开')
+  })
+})

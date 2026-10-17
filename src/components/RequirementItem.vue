@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import {
   REQUIREMENT_STATUSES,
   STATUS_LABELS,
@@ -15,6 +15,24 @@ const emit = defineEmits<{
   'update-status': [id: string, status: RequirementStatus]
   delete: [id: string]
 }>()
+
+const DESCRIPTION_PREVIEW_LENGTH = 80
+
+const expanded = ref(false)
+
+const descriptionCharacters = computed(() => Array.from(props.requirement.description))
+
+const isDescriptionTruncatable = computed(
+  () => descriptionCharacters.value.length > DESCRIPTION_PREVIEW_LENGTH,
+)
+
+const displayedDescription = computed(() => {
+  if (!isDescriptionTruncatable.value || expanded.value) {
+    return props.requirement.description
+  }
+
+  return `${descriptionCharacters.value.slice(0, DESCRIPTION_PREVIEW_LENGTH).join('')}…`
+})
 
 const createdAtLabel = computed(() =>
   new Intl.DateTimeFormat('zh-CN', {
@@ -40,9 +58,24 @@ function handleDelete(): void {
   <li class="requirement-item">
     <div class="requirement-content">
       <h3>{{ requirement.title }}</h3>
-      <p v-if="requirement.description" class="requirement-description">
-        {{ requirement.description }}
-      </p>
+      <div v-if="requirement.description" class="requirement-description-block">
+        <p
+          :id="`description-${requirement.id}`"
+          class="requirement-description"
+        >
+          {{ displayedDescription }}
+        </p>
+        <button
+          v-if="isDescriptionTruncatable"
+          type="button"
+          class="description-toggle"
+          :aria-expanded="expanded"
+          :aria-controls="`description-${requirement.id}`"
+          @click="expanded = !expanded"
+        >
+          {{ expanded ? '收起' : '展开' }}
+        </button>
+      </div>
       <p class="requirement-meta">创建于 {{ createdAtLabel }}</p>
     </div>
 
