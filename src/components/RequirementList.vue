@@ -31,6 +31,26 @@ const countLabel = computed(() =>
     : `${visibleRequirements.value.length} / ${props.requirements.length} 条`,
 )
 
+const statusCountLabel = computed(() => {
+  const counts: Record<RequirementStatus, number> = {
+    todo: 0,
+    'in-progress': 0,
+    done: 0,
+  }
+
+  for (const requirement of props.requirements) {
+    counts[requirement.status] += 1
+  }
+
+  const segments = [`全部 ${props.requirements.length}`]
+
+  for (const status of REQUIREMENT_STATUSES) {
+    segments.push(`${STATUS_LABELS[status]} ${counts[status]}`)
+  }
+
+  return segments.join('、')
+})
+
 function handleFilterChange(event: Event): void {
   statusFilter.value = (event.target as HTMLSelectElement).value as RequirementFilter
 }
@@ -48,6 +68,7 @@ function handleFilterChange(event: Event): void {
             {{ STATUS_LABELS[status] }}
           </option>
         </select>
+        <span class="status-counts">{{ statusCountLabel }}</span>
         <span class="requirement-count">{{ countLabel }}</span>
       </div>
     </div>

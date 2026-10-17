@@ -190,6 +190,11 @@ h1 {
   font-size: 0.8rem;
 }
 
+.status-counts {
+  color: #52606d;
+  font-size: 0.8rem;
+}
+
 .list-toolbar select {
   padding: 7px 10px;
   border: 1px solid #cbd2d9;
@@ -299,6 +304,10 @@ h1 {
 
   .list-toolbar select {
     flex: 1;
+  }
+
+  .status-counts {
+    width: 100%;
   }
 
   .status-control {

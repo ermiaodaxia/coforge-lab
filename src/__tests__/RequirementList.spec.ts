@@ -131,6 +131,40 @@ describe('RequirementList', () => {
     ])
   })
 
+  it('shows status counts for all requirements regardless of the active filter', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    expect(wrapper.text()).toContain('全部 2、待处理 1、进行中 0、已完成 1')
+
+    await wrapper.find('#status-filter').setValue('done')
+
+    expect(wrapper.text()).toContain('全部 2、待处理 1、进行中 0、已完成 1')
+  })
+
+  it('updates the status counts when the requirements change', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.setProps({
+      requirements: [
+        ...requirements,
+        {
+          id: 'requirement-3',
+          title: '进行中的需求',
+          description: '',
+          status: 'in-progress',
+          createdAt: '2026-01-03T08:00:00.000Z',
+          updatedAt: '2026-01-03T08:00:00.000Z',
+        },
+      ],
+    })
+
+    expect(wrapper.text()).toContain('全部 3、待处理 1、进行中 1、已完成 1')
+  })
+
   it('shows the requirement count', () => {
     const wrapper = mount(RequirementList, {
       props: { requirements },
