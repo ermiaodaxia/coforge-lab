@@ -29,6 +29,7 @@ describe('RequirementList', () => {
     })
 
     expect(wrapper.text()).toContain('暂无需求')
+    expect(wrapper.text()).not.toContain('暂无符合条件的需求')
     expect(wrapper.findAll('li')).toHaveLength(0)
   })
 
@@ -42,9 +43,67 @@ describe('RequirementList', () => {
       '按状态筛选',
     ])
     expect(wrapper.text()).toContain('支持 CSV 导出')
-    expect(wrapper.findAll('select')[0].element.value).toBe('todo')
-    expect(wrapper.findAll('select')[1].element.value).toBe('done')
-    expect(wrapper.findAll('option').map((option) => option.text())).toContain('进行中')
+    expect(
+      (wrapper.findAll('.requirement-item select')[0].element as HTMLSelectElement).value,
+    ).toBe('todo')
+    expect(
+      (wrapper.findAll('.requirement-item select')[1].element as HTMLSelectElement).value,
+    ).toBe('done')
+    expect(
+      wrapper.findAll('.requirement-item option').map((option) => option.text()),
+    ).toContain('进行中')
+  })
+
+  it('shows all requirements and the filter defaults to all', () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    expect((wrapper.find('#status-filter').element as HTMLSelectElement).value).toBe('all')
+    expect(wrapper.findAll('h3')).toHaveLength(2)
+    expect(wrapper.text()).toContain('2 条')
+  })
+
+  it('filters requirements by status and updates the count', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual(['按状态筛选'])
+    expect(wrapper.text()).not.toContain('支持 CSV 导出')
+    expect(wrapper.text()).toContain('1 / 2 条')
+  })
+
+  it('shows all requirements again when the filter returns to all', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+    await wrapper.find('#status-filter').setValue('all')
+
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '导出需求列表',
+      '按状态筛选',
+    ])
+    expect(wrapper.text()).toContain('2 条')
+  })
+
+  it('shows a filter-specific empty state when nothing matches', async () => {
+    const wrapper = mount(RequirementList, {
+      props: {
+        requirements: [requirements[0]],
+      },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+
+    expect(wrapper.text()).toContain('暂无符合条件的需求')
+    expect(wrapper.text()).not.toContain('暂无需求')
+    expect(wrapper.findAll('li')).toHaveLength(0)
+    expect(wrapper.find('#status-filter').exists()).toBe(true)
   })
 
   it('emits the requirement id and new status when a status is selected', async () => {
@@ -52,10 +111,23 @@ describe('RequirementList', () => {
       props: { requirements },
     })
 
-    await wrapper.findAll('select')[0].setValue('in-progress')
+    await wrapper.findAll('.requirement-item select')[0].setValue('in-progress')
 
     expect(wrapper.emitted('update-status')).toEqual([
       ['requirement-1', 'in-progress'],
+    ])
+  })
+
+  it('still emits status changes while a filter is active', async () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    await wrapper.find('#status-filter').setValue('done')
+    await wrapper.find('.requirement-item select').setValue('in-progress')
+
+    expect(wrapper.emitted('update-status')).toEqual([
+      ['requirement-2', 'in-progress'],
     ])
   })
 
