@@ -30,9 +30,44 @@ describe('App', () => {
     await wrapper.find('#requirement-title').setValue('状态持久化')
     await wrapper.find('form').trigger('submit')
 
-    await wrapper.find('select').setValue('done')
+    await wrapper.find('.requirement-item select').setValue('done')
 
-    expect(wrapper.find('select').element.value).toBe('done')
+    expect(
+      (wrapper.find('.requirement-item select').element as HTMLSelectElement).value,
+    ).toBe('done')
     expect(window.localStorage.getItem(STORAGE_KEY)).toContain('"status":"done"')
+  })
+
+  it('filters requirements by status', async () => {
+    const wrapper = mount(App)
+
+    await wrapper.find('#requirement-title').setValue('待处理需求')
+    await wrapper.find('form').trigger('submit')
+    await wrapper.find('#requirement-title').setValue('将完成的需求')
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.text()).toContain('全部 2、待处理 2、进行中 0、已完成 0')
+
+    await wrapper.findAll('.requirement-item select')[0].setValue('done')
+
+    expect(wrapper.text()).toContain('全部 2、待处理 1、进行中 0、已完成 1')
+
+    await wrapper.find('#status-filter').setValue('done')
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '将完成的需求',
+    ])
+    expect(wrapper.text()).toContain('1 / 2 条')
+
+    await wrapper.find('#status-filter').setValue('todo')
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '待处理需求',
+    ])
+
+    await wrapper.find('#status-filter').setValue('all')
+    expect(wrapper.findAll('h3').map((heading) => heading.text())).toEqual([
+      '将完成的需求',
+      '待处理需求',
+    ])
+    expect(wrapper.text()).toContain('2 条')
   })
 })

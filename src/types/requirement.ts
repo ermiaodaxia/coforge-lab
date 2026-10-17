@@ -2,6 +2,8 @@ export const REQUIREMENT_STATUSES = ['todo', 'in-progress', 'done'] as const
 
 export type RequirementStatus = (typeof REQUIREMENT_STATUSES)[number]
 
+export type RequirementFilter = 'all' | RequirementStatus
+
 export const STATUS_LABELS: Record<RequirementStatus, string> = {
   todo: '待处理',
   'in-progress': '进行中',
