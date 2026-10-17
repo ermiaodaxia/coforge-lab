@@ -164,4 +164,95 @@ describe('useRequirements', () => {
 
     expect(persistenceError.value).toBe(PERSISTENCE_ERROR)
   })
+
+  it('removes the matching requirement and persists the change', () => {
+    const { requirements, addRequirement, removeRequirement } = useRequirements()
+    addRequirement('第一条')
+    addRequirement('第二条')
+
+    const removed = removeRequirement(requirements.value[0].id)
+
+    expect(removed).toBe(true)
+    expect(requirements.value.map((requirement) => requirement.title)).toEqual([
+      '第一条',
+    ])
+    expect(storedRequirements().map((requirement) => requirement.title)).toEqual([
+      '第一条',
+    ])
+  })
+
+  it('removes only the specified requirement', () => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify([
+        validRequirement,
+        { ...validRequirement, id: 'requirement-2', title: '保留的需求' },
+      ]),
+    )
+    const { requirements, removeRequirement } = useRequirements()
+
+    removeRequirement('requirement-1')
+
+    expect(requirements.value.map((requirement) => requirement.id)).toEqual([
+      'requirement-2',
+    ])
+    expect(storedRequirements().map((requirement) => requirement.id)).toEqual([
+      'requirement-2',
+    ])
+  })
+
+  it('persists an empty list when removing the last requirement', () => {
+    const { requirements, addRequirement, removeRequirement } = useRequirements()
+    addRequirement('唯一的需求')
+
+    removeRequirement(requirements.value[0].id)
+
+    expect(requirements.value).toEqual([])
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('[]')
+  })
+
+  it('returns false and leaves storage untouched for an unknown id', () => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([validRequirement]))
+    const { requirements, removeRequirement } = useRequirements()
+    const storedBefore = window.localStorage.getItem(STORAGE_KEY)
+
+    const removed = removeRequirement('missing')
+
+    expect(removed).toBe(false)
+    expect(requirements.value).toEqual([validRequirement])
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe(storedBefore)
+  })
+
+  it('does not restore a removed requirement after reloading', () => {
+    const first = useRequirements()
+    first.addRequirement('会被删除')
+    first.addRequirement('会被保留')
+    const removedId = first.requirements.value.find(
+      (requirement) => requirement.title === '会被删除',
+    )!.id
+    first.removeRequirement(removedId)
+
+    const second = useRequirements()
+
+    expect(second.requirements.value.map((requirement) => requirement.title)).toEqual([
+      '会被保留',
+    ])
+  })
+
+  it('reports a persistence error when removal cannot be persisted', () => {
+    const failingStorage = {
+      getItem: () => JSON.stringify([validRequirement]),
+      setItem: () => {
+        throw new Error('quota exceeded')
+      },
+    } as unknown as Storage
+    const { requirements, persistenceError, removeRequirement } =
+      useRequirements(failingStorage)
+
+    const removed = removeRequirement(validRequirement.id)
+
+    expect(removed).toBe(true)
+    expect(requirements.value).toEqual([])
+    expect(persistenceError.value).toBe(PERSISTENCE_ERROR)
+  })
 })

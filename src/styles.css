@@ -242,12 +242,40 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.requirement-description-block {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  margin-top: 8px;
+}
+
 .requirement-description {
-  margin: 8px 0 0;
+  margin: 0;
   color: #52606d;
   line-height: 1.6;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+}
+
+.description-toggle {
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.description-toggle:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.description-toggle:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 2px;
 }
 
 .requirement-meta {
@@ -274,6 +302,29 @@ h1 {
   background: #ffffff;
   color: inherit;
   cursor: pointer;
+}
+
+.delete-button {
+  align-self: flex-start;
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 1px solid #f3c2c2;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.delete-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 .app-footer {

@@ -127,10 +127,24 @@ export function useRequirements(storage: Storage = window.localStorage) {
     return true
   }
 
+  function removeRequirement(id: string): boolean {
+    const index = requirements.value.findIndex((requirement) => requirement.id === id)
+    if (index === -1) {
+      return false
+    }
+
+    requirements.value = requirements.value.filter(
+      (requirement) => requirement.id !== id,
+    )
+    persist()
+    return true
+  }
+
   return {
     requirements,
     persistenceError,
     addRequirement,
     updateStatus,
+    removeRequirement,
   }
 }
