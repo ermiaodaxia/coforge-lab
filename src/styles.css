@@ -112,7 +112,8 @@ h1 {
 .field input:focus,
 .field textarea:focus,
 .status-control select:focus,
-.list-toolbar select:focus {
+.list-toolbar select:focus,
+.list-toolbar input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
@@ -195,13 +196,22 @@ h1 {
   font-size: 0.8rem;
 }
 
-.list-toolbar select {
+.list-toolbar select,
+.list-toolbar input {
   padding: 7px 10px;
   border: 1px solid #cbd2d9;
   border-radius: 8px;
   background: #ffffff;
   color: inherit;
+}
+
+.list-toolbar select {
   cursor: pointer;
+}
+
+.list-toolbar input {
+  min-width: 0;
+  width: 180px;
 }
 
 .empty-state {
@@ -302,8 +312,10 @@ h1 {
     width: 100%;
   }
 
-  .list-toolbar select {
+  .list-toolbar select,
+  .list-toolbar input {
     flex: 1;
+    width: auto;
   }
 
   .status-counts {
