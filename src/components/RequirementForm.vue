@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { MEMBERS } from '../types/member'
 
 const emit = defineEmits<{
-  submit: [payload: { title: string; description: string }]
+  submit: [payload: { title: string; description: string; assigneeId: string }]
 }>()
 
 const title = ref('')
 const description = ref('')
+const assigneeId = ref('')
 const error = ref('')
 
 function handleSubmit(): void {
@@ -19,9 +21,11 @@ function handleSubmit(): void {
   emit('submit', {
     title: trimmedTitle,
     description: description.value.trim(),
+    assigneeId: assigneeId.value,
   })
   title.value = ''
   description.value = ''
+  assigneeId.value = ''
   error.value = ''
 }
 </script>
@@ -52,6 +56,16 @@ function handleSubmit(): void {
         rows="3"
         placeholder="补充背景、目标或验收要点"
       />
+    </div>
+
+    <div class="field">
+      <label for="requirement-assignee">需求处理人（选填）</label>
+      <select id="requirement-assignee" v-model="assigneeId">
+        <option value="">未分配</option>
+        <option v-for="member in MEMBERS" :key="member.id" :value="member.id">
+          {{ member.name }}
+        </option>
+      </select>
     </div>
 
     <p v-if="error" id="title-error" class="form-error" role="alert">

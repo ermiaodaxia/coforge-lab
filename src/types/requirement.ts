@@ -15,6 +15,8 @@ export interface Requirement {
   title: string
   description: string
   status: RequirementStatus
+  /** 处理人成员 id，空字符串表示未分配。 */
+  assigneeId: string
   createdAt: string
   updatedAt: string
 }

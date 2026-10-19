@@ -9,6 +9,7 @@ const requirements: Requirement[] = [
     title: '导出需求列表',
     description: '支持 CSV 导出',
     status: 'todo',
+    assigneeId: 'member-1',
     createdAt: '2026-01-01T08:00:00.000Z',
     updatedAt: '2026-01-01T08:00:00.000Z',
   },
@@ -17,6 +18,7 @@ const requirements: Requirement[] = [
     title: '按状态筛选',
     description: '',
     status: 'done',
+    assigneeId: '',
     createdAt: '2026-01-02T08:00:00.000Z',
     updatedAt: '2026-01-02T08:00:00.000Z',
   },
@@ -52,6 +54,17 @@ describe('RequirementList', () => {
     expect(
       wrapper.findAll('.requirement-item option').map((option) => option.text()),
     ).toContain('进行中')
+  })
+
+  it('shows the assignee name or an unassigned label', () => {
+    const wrapper = mount(RequirementList, {
+      props: { requirements },
+    })
+
+    const metas = wrapper.findAll('.requirement-meta').map((meta) => meta.text())
+
+    expect(metas[0]).toContain('处理人：陈一鸣')
+    expect(metas[1]).toContain('处理人：未分配')
   })
 
   it('shows all requirements and the filter defaults to all', () => {
@@ -156,6 +169,7 @@ describe('RequirementList', () => {
           title: '进行中的需求',
           description: '',
           status: 'in-progress',
+          assigneeId: 'member-2',
           createdAt: '2026-01-03T08:00:00.000Z',
           updatedAt: '2026-01-03T08:00:00.000Z',
         },

@@ -4,6 +4,7 @@ import {
   type Requirement,
   type RequirementStatus,
 } from '../types/requirement'
+import { findMember } from '../types/member'
 
 export const STORAGE_KEY = 'coforge-lab.requirements.v1'
 export const EMPTY_TITLE_ERROR = '请输入需求标题'
@@ -19,6 +20,10 @@ function createId(): string {
     return crypto.randomUUID()
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function normalizeAssigneeId(value: unknown): string {
+  return typeof value === 'string' && findMember(value) ? value : ''
 }
 
 function toRequirement(value: unknown): Requirement | null {
@@ -48,6 +53,7 @@ function toRequirement(value: unknown): Requirement | null {
     description:
       typeof record.description === 'string' ? record.description.trim() : '',
     status: record.status,
+    assigneeId: normalizeAssigneeId(record.assigneeId),
     createdAt,
     updatedAt,
   }
@@ -84,7 +90,11 @@ export function useRequirements(storage: Storage = window.localStorage) {
     }
   }
 
-  function addRequirement(title: string, description = ''): AddRequirementResult {
+  function addRequirement(
+    title: string,
+    description = '',
+    assigneeId = '',
+  ): AddRequirementResult {
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
       return { ok: false, error: EMPTY_TITLE_ERROR }
@@ -96,6 +106,7 @@ export function useRequirements(storage: Storage = window.localStorage) {
       title: trimmedTitle,
       description: description.trim(),
       status: 'todo',
+      assigneeId: normalizeAssigneeId(assigneeId),
       createdAt: now,
       updatedAt: now,
     }

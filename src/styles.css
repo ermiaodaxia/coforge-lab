@@ -92,7 +92,8 @@ h1 {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #cbd2d9;
@@ -111,6 +112,7 @@ h1 {
 
 .field input:focus,
 .field textarea:focus,
+.field select:focus,
 .status-control select:focus,
 .list-toolbar select:focus {
   outline: none;

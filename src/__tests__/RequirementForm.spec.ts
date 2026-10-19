@@ -31,10 +31,13 @@ describe('RequirementForm', () => {
     await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('submit')).toEqual([
-      [{ title: '新需求', description: '需求描述' }],
+      [{ title: '新需求', description: '需求描述', assigneeId: '' }],
     ])
     expect((wrapper.find('input').element as HTMLInputElement).value).toBe('')
     expect((wrapper.find('textarea').element as HTMLTextAreaElement).value).toBe('')
+    expect(
+      (wrapper.find('#requirement-assignee').element as HTMLSelectElement).value,
+    ).toBe('')
   })
 
   it('allows submitting with an empty description', async () => {
@@ -44,7 +47,30 @@ describe('RequirementForm', () => {
     await wrapper.find('form').trigger('submit')
 
     expect(wrapper.emitted('submit')).toEqual([
-      [{ title: '只有标题', description: '' }],
+      [{ title: '只有标题', description: '', assigneeId: '' }],
     ])
+  })
+
+  it('emits the selected assignee and resets it after submit', async () => {
+    const wrapper = mount(RequirementForm)
+
+    await wrapper.find('input').setValue('带处理人的需求')
+    await wrapper.find('#requirement-assignee').setValue('member-3')
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.emitted('submit')).toEqual([
+      [{ title: '带处理人的需求', description: '', assigneeId: 'member-3' }],
+    ])
+    expect(
+      (wrapper.find('#requirement-assignee').element as HTMLSelectElement).value,
+    ).toBe('')
+  })
+
+  it('lists the built-in members plus an unassigned option', () => {
+    const wrapper = mount(RequirementForm)
+
+    expect(
+      wrapper.findAll('#requirement-assignee option').map((option) => option.text()),
+    ).toEqual(['未分配', '陈一鸣', '林小雨', '周子墨', '苏晴', '何嘉禾'])
   })
 })

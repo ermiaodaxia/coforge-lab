@@ -38,6 +38,19 @@ describe('App', () => {
     expect(window.localStorage.getItem(STORAGE_KEY)).toContain('"status":"done"')
   })
 
+  it('persists the selected assignee', async () => {
+    const wrapper = mount(App)
+
+    await wrapper.find('#requirement-title').setValue('指派给成员')
+    await wrapper.find('#requirement-assignee').setValue('member-1')
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.text()).toContain('处理人：陈一鸣')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toContain(
+      '"assigneeId":"member-1"',
+    )
+  })
+
   it('filters requirements by status', async () => {
     const wrapper = mount(App)
 

@@ -7,8 +7,12 @@ import type { RequirementStatus } from './types/requirement'
 const { requirements, persistenceError, addRequirement, updateStatus } =
   useRequirements()
 
-function handleSubmit(payload: { title: string; description: string }): void {
-  addRequirement(payload.title, payload.description)
+function handleSubmit(payload: {
+  title: string
+  description: string
+  assigneeId: string
+}): void {
+  addRequirement(payload.title, payload.description, payload.assigneeId)
 }
 
 function handleStatusChange(id: string, status: RequirementStatus): void {

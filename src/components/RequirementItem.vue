@@ -6,6 +6,7 @@ import {
   type Requirement,
   type RequirementStatus,
 } from '../types/requirement'
+import { findMember } from '../types/member'
 
 const props = defineProps<{
   requirement: Requirement
@@ -14,6 +15,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update-status': [id: string, status: RequirementStatus]
 }>()
+
+const assigneeName = computed(
+  () => findMember(props.requirement.assigneeId)?.name ?? '未分配',
+)
 
 const createdAtLabel = computed(() =>
   new Intl.DateTimeFormat('zh-CN', {
@@ -38,7 +43,9 @@ function handleStatusChange(event: Event): void {
       <p v-if="requirement.description" class="requirement-description">
         {{ requirement.description }}
       </p>
-      <p class="requirement-meta">创建于 {{ createdAtLabel }}</p>
+      <p class="requirement-meta">
+        处理人：{{ assigneeName }} · 创建于 {{ createdAtLabel }}
+      </p>
     </div>
 
     <div class="status-control">

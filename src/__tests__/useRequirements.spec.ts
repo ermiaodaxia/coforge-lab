@@ -17,6 +17,7 @@ const validRequirement: Requirement = {
   title: '导出需求列表',
   description: '支持 CSV 导出',
   status: 'todo',
+  assigneeId: 'member-1',
   createdAt: '2026-01-01T08:00:00.000Z',
   updatedAt: '2026-01-01T08:00:00.000Z',
 }
@@ -63,6 +64,20 @@ describe('parseRequirements', () => {
     expect(parsed[0].title).toBe('标题')
     expect(parsed[0].description).toBe('描述')
   })
+
+  it('normalizes missing or unknown assignees to unassigned', () => {
+    const withoutAssignee: Record<string, unknown> = { ...validRequirement }
+    delete withoutAssignee.assigneeId
+    const parsed = parseRequirements(
+      JSON.stringify([
+        withoutAssignee,
+        { ...validRequirement, id: 'requirement-2', assigneeId: 'member-404' },
+      ]),
+    )
+
+    expect(parsed[0].assigneeId).toBe('')
+    expect(parsed[1].assigneeId).toBe('')
+  })
 })
 
 describe('useRequirements', () => {
@@ -83,7 +98,7 @@ describe('useRequirements', () => {
   it('adds a requirement with trimmed values and persists it', () => {
     const { requirements, addRequirement } = useRequirements()
 
-    const result = addRequirement('  新需求  ', '  补充说明  ')
+    const result = addRequirement('  新需求  ', '  补充说明  ', 'member-2')
 
     expect(result).toEqual({ ok: true })
     expect(requirements.value).toHaveLength(1)
@@ -91,12 +106,30 @@ describe('useRequirements', () => {
       title: '新需求',
       description: '补充说明',
       status: 'todo',
+      assigneeId: 'member-2',
     })
     expect(storedRequirements()[0]).toMatchObject({
       title: '新需求',
       description: '补充说明',
       status: 'todo',
+      assigneeId: 'member-2',
     })
+  })
+
+  it('stores an empty assignee when none is given', () => {
+    const { requirements, addRequirement } = useRequirements()
+
+    addRequirement('未分配需求')
+
+    expect(requirements.value[0].assigneeId).toBe('')
+  })
+
+  it('ignores an unknown assignee id', () => {
+    const { requirements, addRequirement } = useRequirements()
+
+    addRequirement('未知处理人', '', 'member-404')
+
+    expect(requirements.value[0].assigneeId).toBe('')
   })
 
   it('places newly added requirements at the top of the list', () => {
